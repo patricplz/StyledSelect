@@ -68,7 +68,6 @@ const Example1 = () => {
               isSearchable={true}
               className='bg-blue-100'
               placeholder="Buscar 1"
-              
             />
 
 
