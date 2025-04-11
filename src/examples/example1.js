@@ -4,12 +4,10 @@ import { UserIcon, BriefcaseIcon, AcademicCapIcon } from '@heroicons/react/solid
 const Example1 = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Estados para cada select
   const [selected1, setSelected1] = useState('');
   const [selected2, setSelected2] = useState('');
   const [selected3, setSelected3] = useState('');
 
-  // Opciones personalizadas
     const options = [
     {
       value: 'option1',
@@ -19,8 +17,9 @@ const Example1 = () => {
           <span>Diseño UX</span>
         </div>
       ),
-      style: 'bg-pink-100 text-purple-800',
-      highlightStyle: 'bg-pink-300',
+      style: 'bg-pink-100 text-purple-800 active:bg-pink-300',
+      highlightStyle: 'bg-pink-500',
+      focusStyle: 'bg-pink-200'
     },
     {
       value: 'option2',
@@ -30,8 +29,9 @@ const Example1 = () => {
           <span>Backend Dev</span>
         </div>
       ),
-      style: 'bg-blue-100 text-blue-800 ',
-      highlightStyle: 'bg-green-500',
+      style: 'bg-blue-100 text-blue-800 active:bg-blue-400',
+      highlightStyle: 'bg-blue-500',
+      focusStyle: 'bg-blue-300'
     },
     {
       value: 'option3',
@@ -41,7 +41,9 @@ const Example1 = () => {
           <span>IA Engineer</span>
         </div>
       ),
-      style: 'bg-green-100 text-green-800 ',
+      style: 'bg-green-100 text-green-800 active:bg-green-400',
+      highlightStyle: 'bg-green-500',
+      focusStyle: 'bg-green-300'
     },
   ]; 
 
@@ -59,7 +61,6 @@ const Example1 = () => {
           <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg space-y-6">
             <h2 className="text-lg font-semibold text-center">Selecciona tus preferencias</h2>
 
-            {/* Select con búsqueda */}
             <StyledSelect
               options={options}
               value={selected1}
@@ -70,17 +71,16 @@ const Example1 = () => {
               
             />
 
-            {/* Select sin búsqueda */}
+
             <StyledSelect
               options={options}
               value={selected2}
               onChange={(opt) => setSelected2(opt.value)}
               isSearchable={false}
               placeholder="Buscar 2"
-              className=''
+              className='bg-green-500'
             />
 
-            {/* Otro Select con búsqueda */}
             <StyledSelect
               options={options}
               value={selected3}

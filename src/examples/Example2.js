@@ -21,10 +21,7 @@ const App = () => {
     {
       value: 'option2',
       label: (
-        <div className="flex w-full items-center ">
-          <BriefcaseIcon className="h-5 w-5 mr-2 text-blue-500 " />
-          <span>Backend Dev</span>
-        </div>
+          'Backend Dev'
       ),
       style: 'bg-blue-100 text-blue-800 ',
       highlightStyle: 'bg-purple-200',
@@ -47,7 +44,6 @@ const App = () => {
 
   return (
     <div className=" flex flex-col max-w-sm mx-auto mt-10 space-y-8">
-      {/* Select con buscador */}
       <StyledSelect
         options={options}
         value={selectedValueSearchable}
@@ -56,7 +52,6 @@ const App = () => {
         className="bg-green-500"
         placeholder='Search 1'
       />
-      {/* Select sin buscador */}
       <StyledSelect
         options={options}
         value={selectedValueSimple}
