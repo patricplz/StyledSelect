@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import StyledSelect from './StyledSelect';
+import StyledSelect from '../StyledSelect';
 import { UserIcon, BriefcaseIcon, AcademicCapIcon } from '@heroicons/react/solid';
 
 const App = () => {
@@ -15,7 +15,7 @@ const App = () => {
           <span>Diseño UX</span>
         </div>
       ),
-      style: 'bg-pink-100 text-purple-800 hover:bg-green-500',
+      style: 'bg-pink-100 text-purple-800 ',
       highlightStyle: 'bg-pink-200',
     },
     {
@@ -26,7 +26,7 @@ const App = () => {
           <span>Backend Dev</span>
         </div>
       ),
-      style: 'bg-blue-100 text-blue-800 hover:bg-orange-500',
+      style: 'bg-blue-100 text-blue-800 ',
       highlightStyle: 'bg-purple-200',
     },
     {
@@ -37,11 +37,13 @@ const App = () => {
           <span>IA Engineer</span>
         </div>
       ),
-      style: 'bg-green-100 text-green-800 hover:bg-yellow-500',
-      highlightStyle: 'bg-green-200',
+      style: 'bg-green-100 text-green-800 '
     },
   ];  
 
+  if (selectedValueSearchable) console.log(selectedValueSearchable);
+  
+  if (selectedValueSimple) console.log(selectedValueSimple);
 
   return (
     <div className=" flex flex-col max-w-sm mx-auto mt-10 space-y-8">
@@ -49,17 +51,19 @@ const App = () => {
       <StyledSelect
         options={options}
         value={selectedValueSearchable}
-        onChange={(opt) => setSelectedValueSearchable(opt)}
+        onChange={(opt) => setSelectedValueSearchable(opt.value)}
         isSearchable={true}
-        className=""
+        className="bg-green-500"
+        placeholder='Search 1'
       />
       {/* Select sin buscador */}
       <StyledSelect
         options={options}
         value={selectedValueSimple}
-        onChange={(opt) => setSelectedValueSimple(opt)}
+        onChange={(opt) => setSelectedValueSimple(opt.value)}
         isSearchable={false}
-        className=""
+        className="bg-blue-500"
+        placeholder='Search 2'
       />
     </div>
   );

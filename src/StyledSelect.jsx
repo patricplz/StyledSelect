@@ -31,10 +31,14 @@ const StyledSelect = ({
   onChange, // Función que maneja el cambio de selección
   className = '', // Estilo personalizado
   isSearchable = false, // Controla si el input de búsqueda está habilitado
+  placeholder = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false); // Estado que controla si el dropdown está abierto o cerrado
   const [searchTerm, setSearchTerm] = useState(''); // Término de búsqueda para filtrar las opciones
-  const [selected, setSelected] = useState(options[0] || null); // Opción seleccionada TODO: cambiar que no sea options[0], sino la opcion con el valor que se pasa por prop
+  const [selected, setSelected] = useState(() => {
+    const initialSelected = options.find(opt => opt.value === value);
+    return initialSelected || null;
+  }); // Opción seleccionada
   const [highlightedIndex, setHighlightedIndex] = useState(0); // Índice de la opción resaltada
   const inputRef = useRef(null); // Referencia al input de búsqueda
   const wrapperRef = useRef(null); // Referencia al contenedor del dropdown
@@ -132,7 +136,6 @@ const StyledSelect = ({
     setSelected(option); // Actualiza la opción seleccionada
     onChange(option); // Llama a la función onChange con el valor de la opción seleccionada
     value = option.value;
-    console.log(value);
     setSearchTerm(''); // Limpia el término de búsqueda
     setIsOpen(false); // Cierra el dropdown
     setHighlightedIndex(filteredOptions.findIndex((opt) => opt.value === option.value)); // Resalta la opción
@@ -150,7 +153,7 @@ const StyledSelect = ({
   const handleFocus = () => {
     // Establece el índice de la opción seleccionada como resaltada al recibir el foco
     const selectedIndex = filteredOptions.findIndex((opt) => opt.value === selected?.value);
-    setHighlightedIndex(selectedIndex !== -1 ? selectedIndex : 0); // Si no se encuentra la opción seleccionada, resalta la primera opción
+    setHighlightedIndex(selectedIndex !== -1 ? selectedIndex : -1); // Si no se encuentra la opción seleccionada, resalta la primera opción
   };
   
 
@@ -171,23 +174,23 @@ const StyledSelect = ({
   return (
     <div
       ref={wrapperRef}
-      className={`relative h-full w-full ${className}`}
+      className={`relative h-full w-full`}
       
       tabIndex={isSearchable === true ? -1 : 0}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
     >
       <div
-        className={`w-full ${selected? selected.style : ''} px-4 py-2 h-full border border-gray-300 rounded-md text-gray-800 flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500`}
+        className={`w-full ${selected? selected.style : className} px-4 py-2 h-full border border-gray-300 rounded-md text-gray-800 flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500`}
         onClick={handleClick}
       >
         {/* Si es un campo de búsqueda, mostramos un input */}
         {isSearchable ? (
           <div className="flex items-center gap-2 w-full relative ">
             <div className="relative flex-1">
-              {searchTerm === '' && selected && (
+              {searchTerm === '' && (
                 <div className={`absolute inset-0 w-full flex items-center pointer-events-none text-gray-700`}>
-                  <span className="w-full truncate">{selected?.label}</span>
+                  <span className="w-full truncate">{selected?.label || placeholder}</span>
                 </div>
               )}
               <input
@@ -205,7 +208,7 @@ const StyledSelect = ({
           </div>
         ) : (
           <div className={`flex items-center gap-2 `}>
-            {selected?.label || 'Selecciona una opción'}
+            {selected?.label || placeholder}
           </div>
         )}
         <ChevronDownIcon className={`h-5 w-5 ml-2 text-gray-500 `} />
@@ -218,8 +221,39 @@ const StyledSelect = ({
               <li
                 key={option.value}
                 onClick={() => handleSelect(option)}
-                className={`cursor-pointer ${highlightedIndex === index ? option.highlightStyle || 'bg-blue-200' : ''} py-2 px-4 flex items-center w-full ${option.style || ''} `}
-              >
+                className={`cursor-pointer 
+                  ${highlightedIndex === index ? (option.highlightStyle ? option.highlightStyle : 'bg-blue-300') : ''} 
+                  py-2 px-4 flex items-center w-full 
+                  ${option.style || ''} 
+                `}
+                onMouseEnter={(e) => {
+                  const listItem = e.target.closest('li');  // Encontrar el <li> que disparó el evento
+                
+                  if (highlightedIndex !== index && option.highlightStyle) {
+                    // Añadir el estilo al div contenedor y al <li>
+                    listItem.classList.add(...option.highlightStyle.split(' '));  // Resalta el <li>
+                  } else if (highlightedIndex !== index && !option.highlightStyle) {
+                    // Añadir la clase de hover por defecto si no hay highlightStyle
+                   
+                    listItem.classList.add('hover:bg-blue-300');
+                  }
+                }}
+                
+                onMouseLeave={(e) => {
+                  const listItem = e.target.closest('li');  // Encontrar el <li> que disparó el evento
+                
+                  if (highlightedIndex !== index && option.highlightStyle) {
+                    // Eliminar el estilo del div contenedor y del <li>
+                    
+                    listItem.classList.remove(...option.highlightStyle.split(' '));
+                  } else if (highlightedIndex !== index && !option.highlightStyle) {
+                    // Eliminar la clase de hover por defecto
+                    
+                    listItem.classList.remove('hover:bg-blue-300');
+                  }
+                }}
+                
+                >
                 <div className={`w-full flex items-center`}>
                   {option.label}
                 </div>
