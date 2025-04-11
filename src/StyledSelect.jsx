@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'; 
-import { ChevronDownIcon } from '@heroicons/react/solid';
 
 /**
  * Function to extract text from JSX elements, handling the case of icons.
@@ -188,11 +187,13 @@ const StyledSelect = ({
             {selected?.label || placeholder}
           </div>
         )}
-        <ChevronDownIcon className={`h-5 w-5 ml-2 text-gray-500`} />
+        ˅
       </div>
 
       {isOpen && (
-        <ul className="absolute w-full border bg-white  mt-1 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
+        <ul className="absolute w-full border bg-white  mt-1 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto"
+        onMouseLeave={() => setHighlightedIndex(-1)}
+        > 
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option, index) => (
               <li
@@ -207,14 +208,15 @@ const StyledSelect = ({
                   setHighlightedIndex(index);
                   if (highlightedIndex !== index) {
                     if (option.focusStyle && selected?.value !== option.value) {
-                      listItem.classList.add(...option.focusStyle.split(' ')); // Añadir focusStyle cuando el ratón pasa
+                      listItem.classList.add(...option.focusStyle.split(' ')); 
                     }
                   }
                 }}
                 onMouseLeave={(e) => {
                   const listItem = e.target.closest('li');
                   if (highlightedIndex !== index && option.focusStyle && selected?.value !== option.value) {
-                    listItem.classList.remove(...option.focusStyle.split(' ')); // Eliminar focusStyle cuando el ratón sale
+                    listItem.classList.remove(...option.focusStyle.split(' '));
+
                   }
                 }}
               >
