@@ -26,6 +26,7 @@ A sleek, keyboard-accessible, and **highly customizable** select component built
   - `style` → base Tailwind classes for rendering
   - `highlightStyle` → applied when selected
   - `focusStyle` → applied when hovered or keyboard-focused
+  - `hoverStyle` → applied when selected and hovered
 
 🎨 Best Practice: Recommended Option Styling
 For a clean, accessible, and aesthetically pleasing style, we recommend the following default styling for options:
