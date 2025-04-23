@@ -32,9 +32,13 @@ A sleek, keyboard-accessible, and **highly customizable** select component built
 For a clean, accessible, and aesthetically pleasing style, we recommend the following default styling for options:
 
 style: 'bg-{color}-100 text-{color}-800 active:bg-{color}-400',
+
 highlightStyle: 'bg-{color}-400',
+
 focusStyle: 'bg-{color}-300',
+
 hoverStyle: 'bg-{color}-500',
+
 These classes ensure:
 
 Good contrast and readability
