@@ -1,11 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// Converts JSX elements into plain text for use in searches
 const getTextFromJSX = (jsx) => {
   if (typeof jsx === 'string') return jsx;
   if (Array.isArray(jsx)) return jsx.map(getTextFromJSX).join('');
   if (jsx?.props?.children) return getTextFromJSX(jsx.props.children);
   return '';
 };
+
+const SVGComponent = ({ className = '', ...props }) => (
+  <svg
+    className={className}
+    width="16px"
+    height="16px"
+    viewBox="0 0 48 48"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="currentColor"
+    {...props}
+  >
+    <path d="M0 0h48v48H0z" fill="none" />
+    <g id="Shopicon">
+      <polygon points="24,29.172 9.414,14.586 6.586,17.414 24,34.828 41.414,17.414 38.586,14.586  " />
+    </g>
+  </svg>
+);
 
 const StyledSelect = ({
   options = [],
@@ -15,23 +33,26 @@ const StyledSelect = ({
   isSearchable = false,
   placeholder = '',
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [isOpen, setIsOpen] = useState(false); // whether dropdown is open
+  const [searchTerm, setSearchTerm] = useState(''); // search input value
   const [selected, setSelected] = useState(() => {
+    // initializes selected option based on provided value
     const initialSelected = options.find(opt => opt.value === value);
     return initialSelected || null;
   });
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const inputRef = useRef(null);
-  const wrapperRef = useRef(null);
-  const optionRefs = useRef([]);
+  const [highlightedIndex, setHighlightedIndex] = useState(0); // index for keyboard navigation
+  const inputRef = useRef(null); // reference to search input
+  const wrapperRef = useRef(null); // reference to dropdown container
+  const optionRefs = useRef([]); // array of refs to each option (used for scrolling)
 
+  // Add index to options for tracking original order
   const processedOptions = options.map((option, index) => ({
     ...option,
     databaseIndex: index,
   }));
 
   useEffect(() => {
+    // Filters options when searchTerm or options change
     const filtered = isSearchable
       ? processedOptions.filter((opt) =>
           (typeof opt.label === 'string' ? opt.label : getTextFromJSX(opt.label))
@@ -40,13 +61,14 @@ const StyledSelect = ({
         )
       : processedOptions;
 
+    // Sets highlight to selected option if still visible
     const newIndex = filtered.findIndex((opt) => opt.value === selected?.value);
     setHighlightedIndex(newIndex !== -1 ? newIndex : -1);
   }, [searchTerm, options, isSearchable, selected]);
 
   const defaultStyle = 'transition-colors duration-150 ease-in-out';
-  const defaultHighlightStyle = 'bg-blue-400'; 
-  const defaultSelectedHoverStyle = 'bg-blue-500 active:bg-blue-400'; 
+  const defaultHighlightStyle = 'bg-blue-400';
+  const defaultSelectedHoverStyle = 'bg-blue-500 active:bg-blue-400';
   const defaultFocusStyle = 'bg-blue-200 active:bg-blue-300';
 
   const filteredOptions = isSearchable
@@ -58,26 +80,30 @@ const StyledSelect = ({
     : processedOptions;
 
   useEffect(() => {
+    // Updates references for each visible option
     optionRefs.current = filteredOptions.map((_, i) => optionRefs.current[i] || React.createRef());
   }, [filteredOptions]);
-  
+
   useEffect(() => {
+    // Scrolls to highlighted option when navigating with keyboard
     if (isOpen && highlightedIndex >= 0 && optionRefs.current[highlightedIndex]?.current) {
       optionRefs.current[highlightedIndex].current.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
       });
     }
-  }, [highlightedIndex, isOpen]);  
+  }, [highlightedIndex, isOpen]);
 
-    const handleBlur = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget)) {
-        setIsOpen(false);
-        setSearchTerm('');
-      }
-    };
+  const handleBlur = (e) => {
+    // Closes dropdown if focus leaves the component
+    if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget)) {
+      setIsOpen(false);
+      setSearchTerm('');
+    }
+  };
 
   const handleKeyDown = (e) => {
+    // Keyboard navigation and selection
     if (isOpen) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -87,18 +113,13 @@ const StyledSelect = ({
         setHighlightedIndex((prev) => Math.max(prev - 1, 0));
       } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        if (isOpen) {
-          const option = filteredOptions[highlightedIndex];
-          if (option) {
-            handleSelect(option);
-          }
-        } else {
-          setIsOpen(true);
-        }
+        const option = filteredOptions[highlightedIndex];
+        if (option) handleSelect(option);
       } else if (e.key === 'Escape') {
         setIsOpen(false);
         setSearchTerm('');
       } else if (e.key === 'Tab' && isOpen) {
+        // Cycles focus through options with Tab key
         e.preventDefault();
         if (e.shiftKey) {
           setHighlightedIndex((prev) =>
@@ -117,6 +138,7 @@ const StyledSelect = ({
   };
 
   const handleSelect = (option) => {
+    // Handles selection of an option
     setSelected(option);
     onChange(option);
     setSearchTerm('');
@@ -131,11 +153,13 @@ const StyledSelect = ({
   };
 
   const handleFocus = () => {
+    // Highlights selected option when focusing input
     const selectedIndex = filteredOptions.findIndex((opt) => opt.value === selected?.value);
     setHighlightedIndex(selectedIndex !== -1 ? selectedIndex : -1);
   };
 
   const handleClick = () => {
+    // Opens/closes the dropdown
     setIsOpen((prev) => {
       const newState = !prev;
       if (newState && isSearchable) {
@@ -154,35 +178,31 @@ const StyledSelect = ({
     const optionStyle = option.style || '';
     const isSelected = selected?.value === option.value;
     const isHighlighted = highlightedIndex === index;
-    
+
+    // Removes any background classes from option.style
     const baseWithoutBg = optionStyle.replace(/bg-[a-z]+-\d+/, '');
-    
+
     if (isSelected && isHighlighted) {
-      
       if (option.highlightStyle) {
         const hoverClass = option.highlightStyle.match(/hover:([^\s]+)/);
         if (hoverClass && hoverClass[0]) {
-
           return `${baseClasses} ${baseWithoutBg} ${option.highlightStyle.replace(/hover:[^\s]+/, '')} ${hoverClass[0].replace('hover:', '')}`;
         }
-
         const bgMatch = option.highlightStyle.match(/bg-([a-z]+)-(\d+)/);
         if (bgMatch && bgMatch[1] && bgMatch[2]) {
           const color = bgMatch[1];
           const intensity = parseInt(bgMatch[2]);
-          const darkerIntensity = Math.min(intensity + 100, 900); 
+          const darkerIntensity = Math.min(intensity + 100, 900);
           return `${baseClasses} ${baseWithoutBg} bg-${color}-${darkerIntensity}`;
         }
       }
       return `${baseClasses} ${baseWithoutBg} ${defaultSelectedHoverStyle}`;
-    }
-    else if (isSelected) {
+    } else if (isSelected) {
       return `${baseClasses} ${baseWithoutBg} ${option.highlightStyle || defaultHighlightStyle}`;
-    }
-    else if (isHighlighted) {
+    } else if (isHighlighted) {
       return `${baseClasses} ${baseWithoutBg} ${option.focusStyle || defaultFocusStyle}`;
     }
-    
+
     return `${baseClasses} ${optionStyle}`;
   };
 
@@ -195,7 +215,7 @@ const StyledSelect = ({
       onKeyDown={handleKeyDown}
     >
       <div
-        className={`${selected?.style || ''} px-4 py-2 border border-gray-300 rounded-md text-gray-800 flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500`}
+        className={`${selected?.style || ''} px-4 py-2 border border-gray-300 rounded-md flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500`}
         onClick={handleClick}
       >
         {isSearchable ? (
@@ -224,21 +244,14 @@ const StyledSelect = ({
             {label}
           </div>
         )}
-        <img 
-          src='./arrowDown.png' 
-          alt='Arrow-Down' 
-          style={{
-            width: '16px',
-            height: '16px',
-            marginLeft: '8px',
-            transition: 'transform 0.2s ease-in-out',
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
-          }}/>
+        <SVGComponent
+          className={`ml-2 w-4 h-4 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+        />
       </div>
 
       {isOpen && (
         <ul
-          className="absolute w-full border border-gray-300 bg-white mt-1 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto"
+          className="absolute w-full border border-gray-300 bg-white mt-1 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto flex flex-col gap-1"
           onMouseLeave={() => setHighlightedIndex(-1)}
         >
           {filteredOptions.length > 0 ? (
