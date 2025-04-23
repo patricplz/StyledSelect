@@ -1,44 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react'; 
+import React, { useState, useEffect, useRef } from 'react';
 
-/**
- * Function to extract text from JSX elements, handling the case of icons.
- * If JSX contains text or an array of elements, returns the concatenated text.
- * If JSX contains a component, recursively extracts its text.
- */
 const getTextFromJSX = (jsx) => {
-  if (typeof jsx === 'string') return jsx; 
-  if (Array.isArray(jsx)) return jsx.map(getTextFromJSX).join(''); 
-  if (jsx?.props?.children) return getTextFromJSX(jsx.props.children); 
-  return ''; 
+  if (typeof jsx === 'string') return jsx;
+  if (Array.isArray(jsx)) return jsx.map(getTextFromJSX).join('');
+  if (jsx?.props?.children) return getTextFromJSX(jsx.props.children);
+  return '';
 };
 
-/**
- * Custom select component with search functionality (if enabled) and dropdown options.
- * 
- * Props:
- * - `options`: List of options (array of objects with `label`, `value`, and optionally `style`).
- * - `value`: The currently selected value.
- * - `onChange`: Function to be called when an option is selected.
- * - `className`: Custom class for styling.
- * - `isSearchable`: Boolean that enables or disables search functionality inside the dropdown.
- */
 const StyledSelect = ({
-  options = [], 
-  value, 
-  onChange, 
-  className = '', 
-  isSearchable = false, 
+  options = [],
+  value,
+  onChange,
+  className = '',
+  isSearchable = false,
   placeholder = '',
 }) => {
-  const [isOpen, setIsOpen] = useState(false); 
-  const [searchTerm, setSearchTerm] = useState(''); 
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selected, setSelected] = useState(() => {
     const initialSelected = options.find(opt => opt.value === value);
     return initialSelected || null;
-  }); 
-  const [highlightedIndex, setHighlightedIndex] = useState(0); 
-  const inputRef = useRef(null); 
-  const wrapperRef = useRef(null); 
+  });
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const inputRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const optionRefs = useRef([]);
 
   const processedOptions = options.map((option, index) => ({
     ...option,
@@ -55,13 +41,13 @@ const StyledSelect = ({
       : processedOptions;
 
     const newIndex = filtered.findIndex((opt) => opt.value === selected?.value);
+    setHighlightedIndex(newIndex !== -1 ? newIndex : -1);
+  }, [searchTerm, options, isSearchable, selected]);
 
-    if (newIndex !== -1) {
-      setHighlightedIndex(newIndex);
-    } else {
-      setHighlightedIndex(-1);
-    }
-  }, [searchTerm, options, isSearchable, selected]); 
+  const defaultStyle = 'transition-colors duration-150 ease-in-out';
+  const defaultHighlightStyle = 'bg-blue-400'; 
+  const defaultSelectedHoverStyle = 'bg-blue-500 active:bg-blue-400'; 
+  const defaultFocusStyle = 'bg-blue-200 active:bg-blue-300';
 
   const filteredOptions = isSearchable
     ? processedOptions.filter((opt) =>
@@ -71,12 +57,25 @@ const StyledSelect = ({
       )
     : processedOptions;
 
-  const handleBlur = (e) => {
-    if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget)) {
-      setIsOpen(false); 
-      setSearchTerm('');
+  useEffect(() => {
+    optionRefs.current = filteredOptions.map((_, i) => optionRefs.current[i] || React.createRef());
+  }, [filteredOptions]);
+  
+  useEffect(() => {
+    if (isOpen && highlightedIndex >= 0 && optionRefs.current[highlightedIndex]?.current) {
+      optionRefs.current[highlightedIndex].current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
     }
-  };
+  }, [highlightedIndex, isOpen]);  
+
+    const handleBlur = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget)) {
+        setIsOpen(false);
+        setSearchTerm('');
+      }
+    };
 
   const handleKeyDown = (e) => {
     if (isOpen) {
@@ -91,13 +90,13 @@ const StyledSelect = ({
         if (isOpen) {
           const option = filteredOptions[highlightedIndex];
           if (option) {
-            handleSelect(option); 
+            handleSelect(option);
           }
         } else {
-          setIsOpen(true); 
+          setIsOpen(true);
         }
       } else if (e.key === 'Escape') {
-        setIsOpen(false); 
+        setIsOpen(false);
         setSearchTerm('');
       } else if (e.key === 'Tab' && isOpen) {
         e.preventDefault();
@@ -110,7 +109,7 @@ const StyledSelect = ({
             prev === filteredOptions.length - 1 ? 0 : prev + 1
           );
         }
-      }      
+      }
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setIsOpen(true);
@@ -118,15 +117,14 @@ const StyledSelect = ({
   };
 
   const handleSelect = (option) => {
-    setSelected(option); 
-    onChange(option); 
-    value = option.value;
-    setSearchTerm(''); 
-    setIsOpen(false); 
-    setHighlightedIndex(filteredOptions.findIndex((opt) => opt.value === option.value)); 
-  
+    setSelected(option);
+    onChange(option);
+    setSearchTerm('');
+    setIsOpen(false);
+    setHighlightedIndex(filteredOptions.findIndex((opt) => opt.value === option.value));
+
     if (!isSearchable) {
-      inputRef.current?.blur(); 
+      inputRef.current?.blur();
     } else {
       setTimeout(() => inputRef.current?.focus(), 0);
     }
@@ -134,7 +132,7 @@ const StyledSelect = ({
 
   const handleFocus = () => {
     const selectedIndex = filteredOptions.findIndex((opt) => opt.value === selected?.value);
-    setHighlightedIndex(selectedIndex !== -1 ? selectedIndex : -1); 
+    setHighlightedIndex(selectedIndex !== -1 ? selectedIndex : -1);
   };
 
   const handleClick = () => {
@@ -149,24 +147,63 @@ const StyledSelect = ({
     });
   };
 
+  const label = selected ? selected.label : placeholder;
+
+  const getOptionClasses = (option, index) => {
+    const baseClasses = `cursor-pointer py-2 px-4 flex items-center w-full ${defaultStyle}`;
+    const optionStyle = option.style || '';
+    const isSelected = selected?.value === option.value;
+    const isHighlighted = highlightedIndex === index;
+    
+    const baseWithoutBg = optionStyle.replace(/bg-[a-z]+-\d+/, '');
+    
+    if (isSelected && isHighlighted) {
+      
+      if (option.highlightStyle) {
+        const hoverClass = option.highlightStyle.match(/hover:([^\s]+)/);
+        if (hoverClass && hoverClass[0]) {
+
+          return `${baseClasses} ${baseWithoutBg} ${option.highlightStyle.replace(/hover:[^\s]+/, '')} ${hoverClass[0].replace('hover:', '')}`;
+        }
+
+        const bgMatch = option.highlightStyle.match(/bg-([a-z]+)-(\d+)/);
+        if (bgMatch && bgMatch[1] && bgMatch[2]) {
+          const color = bgMatch[1];
+          const intensity = parseInt(bgMatch[2]);
+          const darkerIntensity = Math.min(intensity + 100, 900); 
+          return `${baseClasses} ${baseWithoutBg} bg-${color}-${darkerIntensity}`;
+        }
+      }
+      return `${baseClasses} ${baseWithoutBg} ${defaultSelectedHoverStyle}`;
+    }
+    else if (isSelected) {
+      return `${baseClasses} ${baseWithoutBg} ${option.highlightStyle || defaultHighlightStyle}`;
+    }
+    else if (isHighlighted) {
+      return `${baseClasses} ${baseWithoutBg} ${option.focusStyle || defaultFocusStyle}`;
+    }
+    
+    return `${baseClasses} ${optionStyle}`;
+  };
+
   return (
     <div
       ref={wrapperRef}
-      className={`relative h-full w-full`}
-      tabIndex={isSearchable === true ? -1 : 0}
+      className={`relative rounded-md ${className || 'h-full w-full'}`}
+      tabIndex={isSearchable ? -1 : 0}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
     >
       <div
-        className={`w-full ${selected ? selected.style : className} px-4 py-2 h-full border border-gray-300 rounded-md text-gray-800 flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500`}
+        className={`${selected?.style || ''} px-4 py-2 border border-gray-300 rounded-md text-gray-800 flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500`}
         onClick={handleClick}
       >
         {isSearchable ? (
           <div className="flex items-center gap-2 w-full relative">
             <div className="relative flex-1">
               {searchTerm === '' && (
-                <div className={`absolute inset-0 w-full flex items-center pointer-events-none text-gray-700`}>
-                  <span className="w-full truncate">{selected?.label || placeholder}</span>
+                <div className="absolute inset-0 w-full flex items-center pointer-events-none">
+                  <span className="w-full truncate">{label}</span>
                 </div>
               )}
               <input
@@ -183,44 +220,37 @@ const StyledSelect = ({
             </div>
           </div>
         ) : (
-          <div className={`flex items-center gap-2 `}>
-            {selected?.label || placeholder}
+          <div className="flex items-center gap-2">
+            {label}
           </div>
         )}
-        ˅
+        <img 
+          src='./arrowDown.png' 
+          alt='Arrow-Down' 
+          style={{
+            width: '16px',
+            height: '16px',
+            marginLeft: '8px',
+            transition: 'transform 0.2s ease-in-out',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+          }}/>
       </div>
 
       {isOpen && (
-        <ul className="absolute w-full border bg-white  mt-1 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto"
-        onMouseLeave={() => setHighlightedIndex(-1)}
-        > 
+        <ul
+          className="absolute w-full border border-gray-300 bg-white mt-1 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto"
+          onMouseLeave={() => setHighlightedIndex(-1)}
+        >
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option, index) => (
               <li
                 key={option.value}
                 onClick={() => handleSelect(option)}
-                className={`cursor-pointer py-2 px-4 flex items-center w-full ${option.style || ''} 
-                  ${selected?.value === option.value ? (option.highlightStyle || 'bg-blue-500') : ''} 
-                  ${highlightedIndex === index && selected?.value !== option.value ? option.focusStyle : ''}
-                `}
-                onMouseEnter={(e) => {
-                  const listItem = e.target.closest('li');
-                  setHighlightedIndex(index);
-                  if (highlightedIndex !== index) {
-                    if (option.focusStyle && selected?.value !== option.value) {
-                      listItem.classList.add(...option.focusStyle.split(' ')); 
-                    }
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  const listItem = e.target.closest('li');
-                  if (highlightedIndex !== index && option.focusStyle && selected?.value !== option.value) {
-                    listItem.classList.remove(...option.focusStyle.split(' '));
-
-                  }
-                }}
+                ref={optionRefs.current[index]}
+                className={getOptionClasses(option, index)}
+                onMouseEnter={() => setHighlightedIndex(index)}
               >
-                <div className={`w-full flex items-center`}>
+                <div className="w-full flex items-center">
                   {option.label}
                 </div>
               </li>
