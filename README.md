@@ -27,6 +27,23 @@ A sleek, keyboard-accessible, and **highly customizable** select component built
   - `highlightStyle` → applied when selected
   - `focusStyle` → applied when hovered or keyboard-focused
 
+🎨 Best Practice: Recommended Option Styling
+For a clean, accessible, and aesthetically pleasing style, we recommend the following default styling for options:
+
+style: 'bg-{color}-100 text-{color}-800 active:bg-{color}-400',
+highlightStyle: 'bg-{color}-400',
+focusStyle: 'bg-{color}-300',
+hoverStyle: 'bg-{color}-500',
+These classes ensure:
+
+Good contrast and readability
+
+Smooth hover, focus, and active transitions
+
+A cohesive color palette using purple shades
+
+Use this pattern as a baseline and adjust colors as needed to match your app’s theme.
+
 ### 🔍 **Search Feature (Optional)**
 
 - If `isSearchable` is `true`, a text input replaces the label.
