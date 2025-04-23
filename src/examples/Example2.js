@@ -123,6 +123,8 @@ const App = () => {
         isSearchable={true}
         className="bg-green-200"
         placeholder='Search 1'
+        seleccionDiv={true}
+        borderColor="border-red-500"
       />
       <StyledSelect
         options={options}
@@ -131,6 +133,7 @@ const App = () => {
         isSearchable={false}
         className="bg-blue-500"
         placeholder='Search 2'
+        seleccionDiv={false}
       />
     </div>
   );

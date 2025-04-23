@@ -18,9 +18,9 @@ const Example1 = () => {
         </div>
       ),
       style: 'bg-purple-100 text-purple-800 active:bg-purple-400',
-      highlightStyle: 'bg-purple-400',
-      focusStyle: 'bg-purple-300',
-      hoverStyle: 'bg-purple-500',
+      // highlightStyle: 'bg-purple-400',
+      // focusStyle: 'bg-purple-300',
+      // hoverStyle: 'bg-purple-500',
     },
     {
       value: 'option2',
@@ -108,7 +108,7 @@ const Example1 = () => {
           <span>Cybersecurity</span>
         </div>
       ),
-      style: 'bg-orange-100 text-orange-800 active:bg-orange-400',
+      style: 'bg-orange-100 rounded-md text-orange-800 active:bg-orange-400',
       highlightStyle: 'bg-orange-400',
       focusStyle: 'bg-orange-300',
       hoverStyle: 'bg-orange-500',
@@ -134,8 +134,10 @@ const Example1 = () => {
               value={selected1}
               onChange={(opt) => setSelected1(opt.value)}
               isSearchable={true}
-              className='bg-blue-100'
+              className='bg-blue-100 text-pink-500'
               placeholder="Buscar 1"
+              seleccionDiv={true}
+              borderColor="border-red-500"
             />
 
 
@@ -146,6 +148,8 @@ const Example1 = () => {
               isSearchable={false}
               placeholder="Buscar 2"
               className='w-1/2'
+              seleccionDiv={true}
+              borderColor="border-purple-500"
             />
 
             <StyledSelect
@@ -155,6 +159,7 @@ const Example1 = () => {
               isSearchable={true}
               placeholder="Buscar 3"
               className=''
+              seleccionDiv={true}
             />
 
             <div className="flex justify-end space-x-4">
