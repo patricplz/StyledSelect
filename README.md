@@ -14,6 +14,8 @@ A sleek, keyboard-accessible, and **highly customizable** select component built
 | `className`   | `string`   | ❌       | Tailwind classes for styling the select when no specific option is selected. |
 | `isSearchable`| `boolean`  | ❌       | Enables search input when set to `true`. |
 | `placeholder` | `string`   | ❌       | Placeholder text when nothing is selected. |
+| `SeleccionadoDiv`| `boolean`  | ❌       | If `true`: the selected option will remain visible and display a colored overlay and border. The border color can be customized using the `borderColor` prop (default provided). If `false`: the selected option is removed from the list entirely. |
+| `borderColor`    | `string`   | ❌       | Optional. Defines the border color for the selected option when `SeleccionadoDiv` is `true`. |
 
 ---
 
